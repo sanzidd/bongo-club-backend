@@ -31,6 +31,7 @@ const EventSchema = new mongoose.Schema({
     description: String,
     date: String,
     fee: Number,
+    bkashNumber: String,
     status: String,
     createdAt: String
 });
@@ -109,19 +110,22 @@ app.post('/api/events', async (req, res) => {
     res.json(newEvent);
 });
 
+// KEEP ONLY THIS ONE - DELETE THE OTHER
 app.put('/api/events/:id', async (req, res) => {
-    await Event.findOneAndUpdate({ id: req.params.id }, req.body);
-    res.json({ success: true });
+    const updatedEvent = await Event.findOneAndUpdate(
+        { id: req.params.id }, 
+        req.body,
+        { new: true }
+    );
+    res.json(updatedEvent);
 });
 
 app.delete('/api/events/:id', async (req, res) => {
     await Event.findOneAndDelete({ id: req.params.id });
-    // Also delete related payments and expenses
     await Payment.deleteMany({ eventId: req.params.id });
     await Expense.deleteMany({ eventId: req.params.id });
     res.json({ success: true });
 });
-
 // Payments
 app.post('/api/payments', async (req, res) => {
     const newPayment = new Payment(req.body);
